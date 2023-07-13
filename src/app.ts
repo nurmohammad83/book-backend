@@ -1,8 +1,8 @@
 import express, { Application, NextFunction, Request, Response } from 'express';
 import cors from 'cors';
-import httpStatus from 'http-status';
 import globalErrorHandler from './app/middlewares/globalErrorHandeler';
 import routes from './app/routes';
+import httpStatus from 'http-status';
 
 const app: Application = express();
 
@@ -11,7 +11,6 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
 app.use('/api/v1', routes);
-
 
 //global error handler
 app.use(globalErrorHandler);
