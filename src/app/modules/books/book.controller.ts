@@ -52,7 +52,7 @@ const deleteBook = catchAsync(async (req: Request, res: Response) => {
   sendResponse<IBook>(res, {
     statusCode: httpStatus.OK,
     success: true,
-    message: 'Books edit successfully!',
+    message: 'Books delete successfully!',
     data: result,
   });
 });

@@ -58,7 +58,9 @@ const getBooks = async (
   };
 };
 const editBook = async (id: string, editData: IBook): Promise<IBook | null> => {
-  const result = await Books.findByIdAndUpdate({ _id: id }, editData);
+  const result = await Books.findByIdAndUpdate({ _id: id }, editData, {
+    new: true,
+  });
   return result;
 };
 const deleteBook = async (id: string): Promise<IBook | null> => {
