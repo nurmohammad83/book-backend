@@ -5,4 +5,4 @@ const router = express.Router();
 
 router.post('/create-book', BooksController.createBook);
 
-export const UserRoute = router;
+export const BookRoute = router;
