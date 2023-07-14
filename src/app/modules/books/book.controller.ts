@@ -5,6 +5,9 @@ import httpStatus from 'http-status';
 // import { IBook } from './book.interface';
 import { BooksService } from './book.service';
 import { IBook } from './book.interface';
+import pick from '../../../shared/pick';
+import { bookFilterableFields } from './book.constants';
+import { IGenericResponse } from '../../../interfaces/common';
 
 const createBook = catchAsync(async (req: Request, res: Response) => {
   const { ...bookData } = req.body;
@@ -16,7 +19,24 @@ const createBook = catchAsync(async (req: Request, res: Response) => {
     data: result,
   });
 });
+const getBooks = catchAsync(async (req: Request, res: Response) => {
+  const filters = pick(req.query, bookFilterableFields);
+  const paginationOption = pick(req.query, [
+    'page',
+    'limit',
+    'sortBy',
+    'sortOrder',
+  ]);
+  const result = await BooksService.getBooks(filters, paginationOption);
+  sendResponse<IGenericResponse<IBook[]>>(res, {
+    statusCode: httpStatus.OK,
+    success: true,
+    message: 'Books retrieved successfully!',
+    data: result,
+  });
+});
 
 export const BooksController = {
   createBook,
+  getBooks,
 };

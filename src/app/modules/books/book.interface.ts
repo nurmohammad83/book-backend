@@ -9,4 +9,12 @@ export type IBook = {
   reviews?: string[];
 };
 
+export type IBooksFilter = {
+  searchTerm?: string;
+  title?: string;
+  author?: string;
+  genre?: string;
+  publicationDate?: Date;
+};
+
 export type BookModel = Model<IBook, Record<string, unknown>>;
