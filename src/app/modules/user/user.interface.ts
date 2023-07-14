@@ -1,8 +1,8 @@
 import { Model } from 'mongoose';
 
-type IUser = {
+export type IUser = {
   email: string;
-  password: string | number;
+  password: string;
 };
 
 export type IUserModel = Model<IUser, Record<string, unknown>>;
