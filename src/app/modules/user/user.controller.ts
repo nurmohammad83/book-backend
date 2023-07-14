@@ -3,7 +3,11 @@ import catchAsync from '../../../shared/catchAsync';
 import sendResponse from '../../../shared/sendRespons';
 import httpStatus from 'http-status';
 import { UserService } from './user.service';
-import { ILoginUserResponse, IUser } from './user.interface';
+import {
+  ILoginUserResponse,
+  IRefreshTokenResponse,
+  IUser,
+} from './user.interface';
 import config from '../../../config';
 
 const createUser = catchAsync(async (req: Request, res: Response) => {
@@ -35,7 +39,26 @@ const loginUser = catchAsync(async (req: Request, res: Response) => {
   });
 });
 
+const refreshToken = catchAsync(async (req: Request, res: Response) => {
+  const { refreshToken } = req.cookies;
+  const result = await UserService.refreshToken(refreshToken);
+
+  const cookieOptions = {
+    secure: config.env === 'production',
+    httpOnly: true,
+  };
+
+  res.cookie('refreshToken', refreshToken, cookieOptions);
+  sendResponse<IRefreshTokenResponse>(res, {
+    statusCode: 200,
+    success: true,
+    message: 'User logged in successfully !',
+    data: result,
+  });
+});
+
 export const UserController = {
   createUser,
   loginUser,
+  refreshToken,
 };
