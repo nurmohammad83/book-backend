@@ -57,12 +57,17 @@ const getBooks = async (
     data: result,
   };
 };
-const editBook = async (id: string, editData: IBook) => {
+const editBook = async (id: string, editData: IBook): Promise<IBook | null> => {
   const result = await Books.findByIdAndUpdate({ _id: id }, editData);
+  return result;
+};
+const deleteBook = async (id: string): Promise<IBook | null> => {
+  const result = await Books.findByIdAndDelete(id);
   return result;
 };
 export const BooksService = {
   createBook,
   getBooks,
   editBook,
+  deleteBook,
 };
