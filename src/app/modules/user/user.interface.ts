@@ -7,12 +7,12 @@ export type IUser = {
 };
 
 export type ILoginUser = {
-  phoneNumber: string;
+  email: string;
   password: string;
 };
 export type ILoginUserResponse = {
   accessToken: string;
-  refreshToken: string;
+  refreshToken?: string;
 };
 
 export type IUserModel = {
