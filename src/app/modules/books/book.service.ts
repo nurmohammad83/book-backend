@@ -5,6 +5,8 @@ import { bookSearchableFields } from './book.constants';
 import { IBook, IBooksFilter } from './book.interface';
 import { Books } from './book.model';
 import { IGenericResponse } from '../../../interfaces/common';
+import ApiError from '../../../Errors/ApiError';
+import httpStatus from 'http-status';
 
 const createBook = async (bookData: IBook): Promise<IBook> => {
   const result = await Books.create(bookData);
@@ -57,13 +59,41 @@ const getBooks = async (
     data: result,
   };
 };
-const editBook = async (id: string, editData: IBook): Promise<IBook | null> => {
+const editBook = async (
+  id: string,
+  editData: IBook,
+  userEmail: string
+): Promise<IBook | null> => {
+  const isUserExist = await Books.findOne({ _id: id });
+
+  if (isUserExist?.userEmail !== userEmail) {
+    throw new ApiError(
+      httpStatus.UNAUTHORIZED,
+      'You are not authorized this product'
+    );
+  }
   const result = await Books.findByIdAndUpdate({ _id: id }, editData, {
     new: true,
   });
   return result;
 };
-const deleteBook = async (id: string): Promise<IBook | null> => {
+const singleBook = async (id: string): Promise<IBook | null> => {
+  const result = await Books.findById(id);
+  return result;
+};
+const deleteBook = async (
+  id: string,
+  userEmail: string
+): Promise<IBook | null> => {
+  const isUserExist = await Books.findOne({ _id: id });
+
+  if (isUserExist?.userEmail !== userEmail) {
+    throw new ApiError(
+      httpStatus.UNAUTHORIZED,
+      'You are not authorized this product'
+    );
+  }
+
   const result = await Books.findByIdAndDelete(id);
   return result;
 };
@@ -71,5 +101,6 @@ export const BooksService = {
   createBook,
   getBooks,
   editBook,
+  singleBook,
   deleteBook,
 };

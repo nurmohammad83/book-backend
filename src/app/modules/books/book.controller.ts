@@ -8,6 +8,9 @@ import { IBook } from './book.interface';
 import pick from '../../../shared/pick';
 import { bookFilterableFields } from './book.constants';
 import { IGenericResponse } from '../../../interfaces/common';
+import { jwtHelpers } from '../../../helper/jwtHelper';
+import { Secret } from 'jsonwebtoken';
+import config from '../../../config';
 
 const createBook = catchAsync(async (req: Request, res: Response) => {
   const { ...bookData } = req.body;
@@ -38,7 +41,16 @@ const getBooks = catchAsync(async (req: Request, res: Response) => {
 const editBook = catchAsync(async (req: Request, res: Response) => {
   const { id } = req.params;
   const { ...editData } = req.body;
-  const result = await BooksService.editBook(id, editData);
+  const accessToken = req.headers.authorization;
+  let verifiedUser = null;
+
+  verifiedUser = jwtHelpers.verifiedToken(
+    accessToken as string,
+    config.jwt.secret_token as Secret
+  );
+  req.user = verifiedUser;
+  const { userEmail } = verifiedUser;
+  const result = await BooksService.editBook(id, editData, userEmail);
   sendResponse<IBook>(res, {
     statusCode: httpStatus.OK,
     success: true,
@@ -46,9 +58,28 @@ const editBook = catchAsync(async (req: Request, res: Response) => {
     data: result,
   });
 });
+const singleBook = catchAsync(async (req: Request, res: Response) => {
+  const { id } = req.params;
+  const result = await BooksService.singleBook(id);
+  sendResponse<IBook>(res, {
+    statusCode: httpStatus.OK,
+    success: true,
+    message: 'Book retrieved successfully!',
+    data: result,
+  });
+});
 const deleteBook = catchAsync(async (req: Request, res: Response) => {
   const { id } = req.params;
-  const result = await BooksService.deleteBook(id);
+  const accessToken = req.headers.authorization;
+  let verifiedUser = null;
+
+  verifiedUser = jwtHelpers.verifiedToken(
+    accessToken as string,
+    config.jwt.secret_token as Secret
+  );
+  req.user = verifiedUser;
+  const { userEmail } = verifiedUser;
+  const result = await BooksService.deleteBook(id, userEmail);
   sendResponse<IBook>(res, {
     statusCode: httpStatus.OK,
     success: true,
@@ -59,6 +90,7 @@ const deleteBook = catchAsync(async (req: Request, res: Response) => {
 
 export const BooksController = {
   createBook,
+  singleBook,
   getBooks,
   editBook,
   deleteBook,
