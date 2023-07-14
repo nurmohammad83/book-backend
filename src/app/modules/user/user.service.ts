@@ -1,5 +1,6 @@
 import httpStatus from 'http-status';
 import ApiError from '../../../Errors/ApiError';
+import bcrypt from 'bcrypt';
 import {
   ILoginUser,
   ILoginUserResponse,
@@ -11,7 +12,11 @@ import { jwtHelpers } from '../../../helper/jwtHelper';
 import config from '../../../config';
 import { Secret } from 'jsonwebtoken';
 
-const createUser = async (userData: IUser): Promise<IUser> => {
+const createUser = async (userData: IUser): Promise<IUser | null> => {
+  userData.password = await bcrypt.hash(
+    userData.password,
+    Number(config.bcrypt_salt_rounds)
+  );
   const result = await User.create(userData);
   return result;
 };
@@ -19,7 +24,6 @@ const loginUser = async (payload: ILoginUser): Promise<ILoginUserResponse> => {
   const { email, password } = payload;
 
   const isExist = await User.isUserExist(email);
-
   if (!isExist) {
     throw new ApiError(httpStatus.NOT_FOUND, 'User not found!');
   }
@@ -28,7 +32,7 @@ const loginUser = async (payload: ILoginUser): Promise<ILoginUserResponse> => {
     isExist.password &&
     !(await User.isPasswordMatch(password, isExist.password))
   ) {
-    throw new ApiError(httpStatus.NOT_FOUND, 'Password is incorrect!');
+    throw new ApiError(httpStatus.UNAUTHORIZED, 'Password is incorrect');
   }
 
   const { email: userEmail, password: pass } = isExist;

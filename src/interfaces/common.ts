@@ -13,6 +13,3 @@ export type IGenericResponse<T> = {
   };
   data: T;
 };
-export type IGenericLogInResponse<T> = {
-  data: T;
-};
