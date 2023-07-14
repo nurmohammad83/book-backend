@@ -35,8 +35,20 @@ const getBooks = catchAsync(async (req: Request, res: Response) => {
     data: result,
   });
 });
+const editBook = catchAsync(async (req: Request, res: Response) => {
+  const { id } = req.params;
+  const { ...editData } = req.body;
+  const result = await BooksService.editBook(id, editData);
+  sendResponse<IBook>(res, {
+    statusCode: httpStatus.OK,
+    success: true,
+    message: 'Books edit successfully!',
+    data: result,
+  });
+});
 
 export const BooksController = {
   createBook,
   getBooks,
+  editBook,
 };

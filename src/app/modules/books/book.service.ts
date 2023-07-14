@@ -57,7 +57,12 @@ const getBooks = async (
     data: result,
   };
 };
+const editBook = async (id: string, editData: IBook) => {
+  const result = await Books.findByIdAndUpdate({ _id: id }, editData);
+  return result;
+};
 export const BooksService = {
   createBook,
   getBooks,
+  editBook,
 };
