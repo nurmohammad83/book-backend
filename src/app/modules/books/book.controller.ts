@@ -8,9 +8,6 @@ import { IBook } from './book.interface';
 import pick from '../../../shared/pick';
 import { bookFilterableFields } from './book.constants';
 import { IGenericResponse } from '../../../interfaces/common';
-import { jwtHelpers } from '../../../helper/jwtHelper';
-import { Secret } from 'jsonwebtoken';
-import config from '../../../config';
 
 const createBook = catchAsync(async (req: Request, res: Response) => {
   const { ...bookData } = req.body;
@@ -41,16 +38,16 @@ const getBooks = catchAsync(async (req: Request, res: Response) => {
 const editBook = catchAsync(async (req: Request, res: Response) => {
   const { id } = req.params;
   const { ...editData } = req.body;
-  const accessToken = req.headers.authorization;
-  let verifiedUser = null;
+  // const accessToken = req.headers.authorization;
+  // let verifiedUser = null;
 
-  verifiedUser = jwtHelpers.verifiedToken(
-    accessToken as string,
-    config.jwt.secret_token as Secret
-  );
-  req.user = verifiedUser;
-  const { userEmail } = verifiedUser;
-  const result = await BooksService.editBook(id, editData, userEmail);
+  // verifiedUser = jwtHelpers.verifiedToken(
+  //   accessToken as string,
+  //   config.jwt.secret_token as Secret
+  // );
+  // req.user = verifiedUser;
+  // const { userEmail } = verifiedUser;
+  const result = await BooksService.editBook(id, editData);
   sendResponse<IBook>(res, {
     statusCode: httpStatus.OK,
     success: true,
@@ -70,16 +67,8 @@ const singleBook = catchAsync(async (req: Request, res: Response) => {
 });
 const deleteBook = catchAsync(async (req: Request, res: Response) => {
   const { id } = req.params;
-  const accessToken = req.headers.authorization;
-  let verifiedUser = null;
 
-  verifiedUser = jwtHelpers.verifiedToken(
-    accessToken as string,
-    config.jwt.secret_token as Secret
-  );
-  req.user = verifiedUser;
-  const { userEmail } = verifiedUser;
-  const result = await BooksService.deleteBook(id, userEmail);
+  const result = await BooksService.deleteBook(id);
   sendResponse<IBook>(res, {
     statusCode: httpStatus.OK,
     success: true,

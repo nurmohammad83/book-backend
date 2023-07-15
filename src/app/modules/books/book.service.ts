@@ -5,8 +5,6 @@ import { bookSearchableFields } from './book.constants';
 import { IBook, IBooksFilter } from './book.interface';
 import { Books } from './book.model';
 import { IGenericResponse } from '../../../interfaces/common';
-import ApiError from '../../../Errors/ApiError';
-import httpStatus from 'http-status';
 
 const createBook = async (bookData: IBook): Promise<IBook> => {
   const result = await Books.create(bookData);
@@ -17,8 +15,9 @@ const getBooks = async (
   paginationOptions: IPaginationOption
 ): Promise<IGenericResponse<IBook[]>> => {
   const { searchTerm, ...filterData } = filters;
-  const { limit, sortBy, sortOrder, page } =
+  const { limit, skip, sortBy, sortOrder, page } =
     paginationHelper.calculatePagination(paginationOptions);
+
   const andCondition = [];
 
   if (searchTerm) {
@@ -31,7 +30,6 @@ const getBooks = async (
       })),
     });
   }
-
   if (Object.keys(filterData).length) {
     andCondition.push({
       $and: Object.entries(filterData).map(([field, value]) => ({
@@ -39,16 +37,19 @@ const getBooks = async (
       })),
     });
   }
+  const sortConditions: { [key: string]: SortOrder } = {};
 
-  const sortCondition: { [key: string]: SortOrder } = {};
-  if (sortOrder && sortBy) {
-    sortCondition[sortBy] = sortOrder;
+  if (sortBy && sortOrder) {
+    sortConditions[sortBy] = sortOrder;
   }
   const whereCondition = andCondition.length > 0 ? { $and: andCondition } : {};
 
-  const result = await Books.find(whereCondition);
+  const result = await Books.find(whereCondition)
+    .sort(sortConditions)
+    .skip(skip)
+    .limit(limit);
 
-  const total = await Books.countDocuments();
+  const total = await Books.countDocuments(whereCondition);
 
   return {
     meta: {
@@ -59,19 +60,7 @@ const getBooks = async (
     data: result,
   };
 };
-const editBook = async (
-  id: string,
-  editData: IBook,
-  userEmail: string
-): Promise<IBook | null> => {
-  const isUserExist = await Books.findOne({ _id: id });
-
-  if (isUserExist?.userEmail !== userEmail) {
-    throw new ApiError(
-      httpStatus.UNAUTHORIZED,
-      'You are not authorized this product'
-    );
-  }
+const editBook = async (id: string, editData: IBook): Promise<IBook | null> => {
   const result = await Books.findByIdAndUpdate({ _id: id }, editData, {
     new: true,
   });
@@ -81,19 +70,7 @@ const singleBook = async (id: string): Promise<IBook | null> => {
   const result = await Books.findById(id);
   return result;
 };
-const deleteBook = async (
-  id: string,
-  userEmail: string
-): Promise<IBook | null> => {
-  const isUserExist = await Books.findOne({ _id: id });
-
-  if (isUserExist?.userEmail !== userEmail) {
-    throw new ApiError(
-      httpStatus.UNAUTHORIZED,
-      'You are not authorized this product'
-    );
-  }
-
+const deleteBook = async (id: string): Promise<IBook | null> => {
   const result = await Books.findByIdAndDelete(id);
   return result;
 };
