@@ -5,6 +5,7 @@ import { bookSearchableFields } from './book.constants';
 import { IBook, IBooksFilter } from './book.interface';
 import { Books } from './book.model';
 import { IGenericResponse } from '../../../interfaces/common';
+import { IComment } from './book.controller';
 
 const createBook = async (bookData: IBook): Promise<IBook> => {
   const result = await Books.create(bookData);
@@ -70,6 +71,17 @@ const singleBook = async (id: string): Promise<IBook | null> => {
   const result = await Books.findById(id);
   return result;
 };
+const getComment = async (id: string) => {
+  const result = await Books.findOne({ _id: id }, { _id: 0, reviews: 1 });
+  return result;
+};
+const addComment = async (id: string, review: IComment) => {
+  const result = await Books.findOneAndUpdate(
+    { _id: id },
+    { $push: { reviews: review } }
+  );
+  return result;
+};
 const deleteBook = async (id: string): Promise<IBook | null> => {
   const result = await Books.findByIdAndDelete(id);
   return result;
@@ -80,4 +92,6 @@ export const BooksService = {
   editBook,
   singleBook,
   deleteBook,
+  addComment,
+  getComment,
 };

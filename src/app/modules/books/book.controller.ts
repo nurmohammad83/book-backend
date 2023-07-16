@@ -19,6 +19,22 @@ const createBook = catchAsync(async (req: Request, res: Response) => {
     data: result,
   });
 });
+
+export type IComment = {
+  reviews: string[];
+};
+const addComment = catchAsync(async (req: Request, res: Response) => {
+  const { id } = req.params;
+  const { review } = req.body;
+  const result = await BooksService.addComment(id, review);
+  sendResponse(res, {
+    statusCode: httpStatus.OK,
+    success: true,
+    message: 'review added  successfully!',
+    data: result,
+  });
+});
+
 const getBooks = catchAsync(async (req: Request, res: Response) => {
   const filters = pick(req.query, bookFilterableFields);
   const paginationOption = pick(req.query, [
@@ -65,6 +81,16 @@ const singleBook = catchAsync(async (req: Request, res: Response) => {
     data: result,
   });
 });
+const getComment = catchAsync(async (req: Request, res: Response) => {
+  const { id } = req.params;
+  const result = await BooksService.getComment(id);
+  sendResponse(res, {
+    statusCode: httpStatus.OK,
+    success: true,
+    message: 'Comment retrieved successfully!',
+    data: result,
+  });
+});
 const deleteBook = catchAsync(async (req: Request, res: Response) => {
   const { id } = req.params;
 
@@ -83,4 +109,6 @@ export const BooksController = {
   getBooks,
   editBook,
   deleteBook,
+  getComment,
+  addComment,
 };
