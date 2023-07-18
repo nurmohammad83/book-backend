@@ -12,14 +12,17 @@ export type ILoginUser = {
   email: string;
   password: string;
 };
+
 export type ILoginUserResponse = {
   accessToken: string;
   refreshToken?: string;
   email: string;
 };
+
 export type IRefreshTokenResponse = {
   accessToken: string;
 };
+
 export type IUserModel = {
   isUserExist(email: string): Promise<Pick<IUser, 'email' | 'password'>>;
   isPasswordMatch(

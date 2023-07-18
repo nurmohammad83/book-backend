@@ -21,6 +21,7 @@ const createUser = async (userData: IUser): Promise<IUser | null> => {
   const result = await User.create(userData);
   return result;
 };
+
 const loginUser = async (payload: ILoginUser): Promise<ILoginUserResponse> => {
   const { email, password } = payload;
 

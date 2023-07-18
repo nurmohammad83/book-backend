@@ -69,7 +69,6 @@ export const addToWishList = async (req: Request, res: Response) => {
   });
 };
 
-// get wishlist
 export const getWishList = async (req: Request, res: Response) => {
   const user = req.user;
   const result = await UserService.getWishList(user);
@@ -80,6 +79,7 @@ export const getWishList = async (req: Request, res: Response) => {
     data: result,
   });
 };
+
 export const addToReadList = async (req: Request, res: Response) => {
   const user = req.user;
   const result = await UserService.addToReadList(req.body, user);
@@ -91,7 +91,6 @@ export const addToReadList = async (req: Request, res: Response) => {
   });
 };
 
-// get wishlist
 export const getReadList = async (req: Request, res: Response) => {
   const user = req.user;
   const result = await UserService.getReadList(user);
