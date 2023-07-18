@@ -24,6 +24,7 @@ const createUser = catchAsync(async (req: Request, res: Response) => {
 const loginUser = catchAsync(async (req: Request, res: Response) => {
   const { ...loginData } = req.body;
   const result = await UserService.loginUser(loginData);
+
   const { refreshToken, ...others } = result;
   const cookieOptions = {
     secure: config.env === 'production',
@@ -57,8 +58,57 @@ const refreshToken = catchAsync(async (req: Request, res: Response) => {
   });
 });
 
+export const addToWishList = async (req: Request, res: Response) => {
+  const user = req.user;
+  const result = await UserService.addToWishList(req.body, user);
+  res.send({
+    success: true,
+    statusCode: 200,
+    message: 'Added to wishlist',
+    data: result,
+  });
+};
+
+// get wishlist
+export const getWishList = async (req: Request, res: Response) => {
+  const user = req.user;
+  const result = await UserService.getWishList(user);
+  res.send({
+    success: true,
+    statusCode: 200,
+    message: 'Wishlist retrieved successfully',
+    data: result,
+  });
+};
+export const addToReadList = async (req: Request, res: Response) => {
+  const user = req.user;
+  const result = await UserService.addToReadList(req.body, user);
+  res.send({
+    success: true,
+    statusCode: 200,
+    message: 'Added to Reading list',
+    data: result,
+  });
+};
+
+// get wishlist
+export const getReadList = async (req: Request, res: Response) => {
+  const user = req.user;
+  const result = await UserService.getReadList(user);
+  res.send({
+    success: true,
+    statusCode: 200,
+    message: 'Read list retrieved successfully',
+    data: result,
+  });
+};
+
 export const UserController = {
   createUser,
   loginUser,
   refreshToken,
+  getWishList,
+  getReadList,
+  addToReadList,
+  addToWishList,
 };

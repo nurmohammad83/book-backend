@@ -17,7 +17,6 @@ const bookSchema = new Schema<IBook, BookModel>(
     },
     userEmail: {
       type: String,
-      required: true,
     },
     thumbnail: {
       type: String,

@@ -4,6 +4,8 @@ import { Model } from 'mongoose';
 export type IUser = {
   email: string;
   password: string;
+  wishlist?: [];
+  readinglist?: [];
 };
 
 export type ILoginUser = {
@@ -13,6 +15,7 @@ export type ILoginUser = {
 export type ILoginUserResponse = {
   accessToken: string;
   refreshToken?: string;
+  email: string;
 };
 export type IRefreshTokenResponse = {
   accessToken: string;

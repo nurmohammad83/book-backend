@@ -5,13 +5,19 @@ const userSchema = new Schema<IUser, IUserModel>(
   {
     email: {
       type: String,
-      unique: true,
       required: true,
+      unique: true,
     },
     password: {
       type: String,
       required: true,
       select: 0,
+    },
+    wishlist: {
+      type: Array,
+    },
+    readinglist: {
+      type: Array,
     },
   },
   {

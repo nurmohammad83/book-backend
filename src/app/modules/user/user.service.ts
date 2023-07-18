@@ -1,3 +1,4 @@
+import { IBook } from './../books/book.interface';
 import httpStatus from 'http-status';
 import ApiError from '../../../Errors/ApiError';
 import bcrypt from 'bcrypt';
@@ -10,7 +11,7 @@ import {
 import { User } from './user.model';
 import { jwtHelpers } from '../../../helper/jwtHelper';
 import config from '../../../config';
-import { Secret } from 'jsonwebtoken';
+import { JwtPayload, Secret } from 'jsonwebtoken';
 
 const createUser = async (userData: IUser): Promise<IUser | null> => {
   userData.password = await bcrypt.hash(
@@ -50,6 +51,7 @@ const loginUser = async (payload: ILoginUser): Promise<ILoginUserResponse> => {
   return {
     accessToken,
     refreshToken,
+    email: userEmail,
   };
 };
 
@@ -82,4 +84,79 @@ const refreshToken = async (token: string): Promise<IRefreshTokenResponse> => {
     accessToken: newAccessToken,
   };
 };
-export const UserService = { createUser, loginUser, refreshToken };
+
+export const addToWishList = async (
+  payload: IBook,
+  user: JwtPayload | null
+) => {
+  const isUserExist = await User.findOne({ email: user?.userEmail });
+  if (!isUserExist) {
+    throw new ApiError(httpStatus.NOT_FOUND, 'User Not Found');
+  }
+  try {
+    const result = await User.updateOne(
+      { email: user?.userEmail },
+      { $push: { wishlist: payload } }
+    );
+    if (!result.modifiedCount) {
+      return new ApiError(
+        httpStatus.NOT_FOUND,
+        'User Not Found add failed failed'
+      );
+    }
+    return result;
+  } catch (error) {
+    throw new ApiError(httpStatus.NOT_FOUND, 'Not found');
+  }
+};
+
+export const getWishList = async (user: JwtPayload | null) => {
+  const isUserExist = await User.findOne({ email: user?.userEmail });
+  if (!isUserExist) {
+    throw new ApiError(httpStatus.NOT_FOUND, 'User Not Found');
+  }
+  return isUserExist.wishlist;
+};
+
+export const addToReadList = async (
+  payload: IBook,
+  user: JwtPayload | null
+) => {
+  const isUserExist = await User.findOne({ email: user?.userEmail });
+  if (!isUserExist) {
+    throw new ApiError(httpStatus.NOT_FOUND, 'User Not Found');
+  }
+  try {
+    const result = await User.updateOne(
+      { email: user?.userEmail },
+      { $push: { readinglist: payload } }
+    );
+    if (!result.modifiedCount) {
+      return new ApiError(
+        httpStatus.NOT_FOUND,
+        'User Not Found add failed failed'
+      );
+    }
+    return result;
+  } catch (error) {
+    throw new ApiError(httpStatus.NOT_FOUND, 'Not found');
+  }
+};
+
+export const getReadList = async (user: JwtPayload | null) => {
+  const isUserExist = await User.findOne({ email: user?.userEmail });
+  if (!isUserExist) {
+    throw new ApiError(httpStatus.NOT_FOUND, 'User Not Found');
+  }
+  return isUserExist.readinglist;
+};
+
+export const UserService = {
+  createUser,
+  loginUser,
+  refreshToken,
+  addToWishList,
+  getWishList,
+  addToReadList,
+  getReadList,
+};

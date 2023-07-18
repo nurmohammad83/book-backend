@@ -5,7 +5,10 @@ import { bookSearchableFields } from './book.constants';
 import { IBook, IBooksFilter } from './book.interface';
 import { Books } from './book.model';
 import { IGenericResponse } from '../../../interfaces/common';
-import { IComment } from './book.controller';
+import { IReview } from './book.controller';
+import { JwtPayload } from 'jsonwebtoken';
+import ApiError from '../../../Errors/ApiError';
+import httpStatus from 'http-status';
 
 const createBook = async (bookData: IBook): Promise<IBook> => {
   const result = await Books.create(bookData);
@@ -61,37 +64,65 @@ const getBooks = async (
     data: result,
   };
 };
-const editBook = async (id: string, editData: IBook): Promise<IBook | null> => {
+
+const singleBook = async (id: string): Promise<IBook | null> => {
+  const result = await Books.findById(id);
+  return result;
+};
+
+const editBook = async (
+  id: string,
+  editData: IBook,
+  user: JwtPayload | null
+): Promise<IBook | null> => {
+  const isBookExist = await Books.findOne({ _id: id });
+  if (!isBookExist) {
+    throw new ApiError(httpStatus.NOT_FOUND, 'Book Not Found');
+  }
+
+  if (isBookExist.userEmail !== user?.userEmail) {
+    throw new ApiError(httpStatus.FORBIDDEN, 'Forbidden');
+  }
   const result = await Books.findByIdAndUpdate({ _id: id }, editData, {
     new: true,
   });
   return result;
 };
-const singleBook = async (id: string): Promise<IBook | null> => {
-  const result = await Books.findById(id);
+
+const deleteBook = async (
+  id: string,
+  user: JwtPayload | null
+): Promise<IBook | null> => {
+  const isBookExist = await Books.findOne({ _id: id });
+  if (!isBookExist) {
+    throw new ApiError(httpStatus.NOT_FOUND, 'Book Not Found');
+  }
+
+  if (isBookExist.userEmail !== user?.userEmail) {
+    throw new ApiError(httpStatus.FORBIDDEN, 'Forbidden');
+  }
+  const result = await Books.findByIdAndDelete(id);
   return result;
 };
-const getComment = async (id: string) => {
+
+const getReview = async (id: string) => {
   const result = await Books.findOne({ _id: id }, { _id: 0, reviews: 1 });
   return result;
 };
-const addComment = async (id: string, review: IComment) => {
+const addReview = async (id: string, review: IReview) => {
   const result = await Books.findOneAndUpdate(
     { _id: id },
     { $push: { reviews: review } }
   );
   return result;
 };
-const deleteBook = async (id: string): Promise<IBook | null> => {
-  const result = await Books.findByIdAndDelete(id);
-  return result;
-};
+
 export const BooksService = {
   createBook,
   getBooks,
   editBook,
   singleBook,
   deleteBook,
-  addComment,
-  getComment,
+  addReview,
+  getReview,
 };

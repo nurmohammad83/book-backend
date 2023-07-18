@@ -10,7 +10,9 @@ import { bookFilterableFields } from './book.constants';
 import { IGenericResponse } from '../../../interfaces/common';
 
 const createBook = catchAsync(async (req: Request, res: Response) => {
-  const { ...bookData } = req.body;
+  const bookData = req.body;
+  const user = req.user;
+  bookData.userEmail = user?.userEmail;
   const result = await BooksService.createBook(bookData);
   sendResponse<IBook>(res, {
     statusCode: httpStatus.OK,
@@ -20,17 +22,17 @@ const createBook = catchAsync(async (req: Request, res: Response) => {
   });
 });
 
-export type IComment = {
+export type IReview = {
   reviews: string[];
 };
-const addComment = catchAsync(async (req: Request, res: Response) => {
+
+const singleBook = catchAsync(async (req: Request, res: Response) => {
   const { id } = req.params;
-  const { review } = req.body;
-  const result = await BooksService.addComment(id, review);
-  sendResponse(res, {
+  const result = await BooksService.singleBook(id);
+  sendResponse<IBook>(res, {
     statusCode: httpStatus.OK,
     success: true,
-    message: 'review added  successfully!',
+    message: 'Book retrieved successfully!',
     data: result,
   });
 });
@@ -54,16 +56,8 @@ const getBooks = catchAsync(async (req: Request, res: Response) => {
 const editBook = catchAsync(async (req: Request, res: Response) => {
   const { id } = req.params;
   const { ...editData } = req.body;
-  // const accessToken = req.headers.authorization;
-  // let verifiedUser = null;
-
-  // verifiedUser = jwtHelpers.verifiedToken(
-  //   accessToken as string,
-  //   config.jwt.secret_token as Secret
-  // );
-  // req.user = verifiedUser;
-  // const { userEmail } = verifiedUser;
-  const result = await BooksService.editBook(id, editData);
+  const user = req.user;
+  const result = await BooksService.editBook(id, editData, user);
   sendResponse<IBook>(res, {
     statusCode: httpStatus.OK,
     success: true,
@@ -71,34 +65,37 @@ const editBook = catchAsync(async (req: Request, res: Response) => {
     data: result,
   });
 });
-const singleBook = catchAsync(async (req: Request, res: Response) => {
+
+const getReview = catchAsync(async (req: Request, res: Response) => {
   const { id } = req.params;
-  const result = await BooksService.singleBook(id);
-  sendResponse<IBook>(res, {
-    statusCode: httpStatus.OK,
-    success: true,
-    message: 'Book retrieved successfully!',
-    data: result,
-  });
-});
-const getComment = catchAsync(async (req: Request, res: Response) => {
-  const { id } = req.params;
-  const result = await BooksService.getComment(id);
+  const result = await BooksService.getReview(id);
   sendResponse(res, {
     statusCode: httpStatus.OK,
     success: true,
-    message: 'Comment retrieved successfully!',
+    message: 'Review retrieved successfully!',
     data: result,
   });
 });
 const deleteBook = catchAsync(async (req: Request, res: Response) => {
   const { id } = req.params;
-
-  const result = await BooksService.deleteBook(id);
+  const user = req.user;
+  const result = await BooksService.deleteBook(id, user);
   sendResponse<IBook>(res, {
     statusCode: httpStatus.OK,
     success: true,
     message: 'Books delete successfully!',
+    data: result,
+  });
+});
+
+const addReview = catchAsync(async (req: Request, res: Response) => {
+  const { id } = req.params;
+  const { review } = req.body;
+  const result = await BooksService.addReview(id, review);
+  sendResponse(res, {
+    statusCode: httpStatus.OK,
+    success: true,
+    message: 'review added  successfully!',
     data: result,
   });
 });
@@ -109,6 +106,6 @@ export const BooksController = {
   getBooks,
   editBook,
   deleteBook,
-  getComment,
-  addComment,
+  getReview,
+  addReview,
 };
